@@ -7,94 +7,277 @@
 {% endblock %}
 
 {% block content %}
-<div class="grid-dashboard">
+<section class="dashboard-shell">
+    <div class="dashboard-hero">
+        <div class="dashboard-hero-copy">
+            <span class="dashboard-eyebrow">{{ session['role'] | upper }} PORTAL</span>
+            <h1 class="dashboard-title">
+                {% if session['role'] == 'student' %}
+                Track attendance, fees, and academic performance in one place.
+                {% elif session['role'] == 'faculty' %}
+                Run classes, attendance sessions, and risk follow-up without switching screens.
+                {% else %}
+                Oversee users, campus activity, and academic operations from a single control surface.
+                {% endif %}
+            </h1>
+            <p class="dashboard-subtitle">
+                {% if session['role'] == 'student' %}
+                Stay on top of deadlines and spot weak areas before they affect your semester.
+                {% elif session['role'] == 'faculty' %}
+                Launch QR attendance fast, review recent activity, and move directly into teaching workflows.
+                {% else %}
+                Monitor platform health, user distribution, and the admin actions that matter most.
+                {% endif %}
+            </p>
+        </div>
+        <div class="dashboard-hero-panel">
+            <div class="hero-panel-label">Quick Access</div>
+            <div class="hero-panel-grid">
+                <a href="/events" class="hero-shortcut">
+                    <span>Events</span>
+                    <small>Upcoming campus activity</small>
+                </a>
+                {% if session['role'] == 'student' %}
+                <a href="/attendance" class="hero-shortcut">
+                    <span>Attendance</span>
+                    <small>Review recent records</small>
+                </a>
+                <a href="/fees" class="hero-shortcut">
+                    <span>Fees</span>
+                    <small>Check dues and status</small>
+                </a>
+                {% elif session['role'] == 'faculty' %}
+                <a href="/attendance" class="hero-shortcut">
+                    <span>Manual Marking</span>
+                    <small>Run class attendance</small>
+                </a>
+                <a href="/qr-attendance" class="hero-shortcut">
+                    <span>QR Sessions</span>
+                    <small>Launch live scan flow</small>
+                </a>
+                {% else %}
+                <a href="/admin-panel" class="hero-shortcut">
+                    <span>User Admin</span>
+                    <small>Review and manage accounts</small>
+                </a>
+                <a href="/manage-fees" class="hero-shortcut">
+                    <span>Fees Desk</span>
+                    <small>Track and notify dues</small>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
     {% if session['role'] == 'student' %}
-    <!-- Student Stats -->
-    <div class="card">
-        <h3>Attendance Overview</h3>
-        <div class="stat-value" style="color: var(--primary);">{{ stats.get('attendance', 0)|round(1) }}%</div>
-        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
-            {% if stats.get('attendance', 0) < 75 %} 
-                <span class="badge bg-danger">Low Attendance</span>
-            {% else %}
-                <span class="badge bg-success">Satisfactory</span>
-            {% endif %}
-        </p>
+    <div class="dashboard-metrics">
+        <article class="metric-card metric-card-primary">
+            <div class="metric-label">Attendance</div>
+            <div class="metric-value">{{ stats.get('attendance', 0)|round(1) }}%</div>
+            <div class="metric-meta">
+                {% if stats.get('attendance', 0) < 75 %}
+                <span class="badge bg-danger">Needs Attention</span>
+                {% else %}
+                <span class="badge bg-success">On Track</span>
+                {% endif %}
+            </div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-label">Fee Status</div>
+            <div class="metric-value metric-value-sm">{{ stats.get('fee_status', 'N/A') }}</div>
+            <div class="metric-meta">Billing snapshot for your current term</div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-label">Borrowed Books</div>
+            <div class="metric-value">{{ stats.get('borrowed_count', 0) }}</div>
+            <div class="metric-meta">Active library records in your account</div>
+        </article>
     </div>
 
-    <div class="card">
-        <h3>Fee Status</h3>
-        <div class="stat-value" style="color: var(--secondary);">{{ stats.get('fee_status', 'N/A') }}</div>
-        <a href="/fees" class="btn btn-outline" style="margin-top: 1rem; text-decoration: none;">View History</a>
-    </div>
+    <div class="dashboard-layout dashboard-layout-student">
+        <section class="card dashboard-panel chart-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-kicker">Performance</div>
+                    <h3>Internal marks overview</h3>
+                </div>
+                <a href="/performance-analyzer" class="panel-link">Open analyzer</a>
+            </div>
+            <div class="chart-wrap">
+                <canvas id="performanceChart"></canvas>
+            </div>
+        </section>
 
-    <div class="card" style="grid-column: span 2;">
-        <h3>Internal Performance</h3>
-        <canvas id="performanceChart" style="max-height: 250px;"></canvas>
+        <section class="card dashboard-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-kicker">Action Queue</div>
+                    <h3>Next steps</h3>
+                </div>
+            </div>
+            <div class="action-stack">
+                <a href="/fees" class="action-card">
+                    <strong>Review fee timeline</strong>
+                    <span>See paid, pending, and overdue records.</span>
+                </a>
+                <a href="/attendance" class="action-card">
+                    <strong>Check attendance history</strong>
+                    <span>Confirm manual and QR-based marks.</span>
+                </a>
+                <a href="/library" class="action-card">
+                    <strong>Manage library items</strong>
+                    <span>Track borrow status and availability.</span>
+                </a>
+            </div>
+        </section>
     </div>
 
     {% elif session['role'] == 'faculty' %}
-    <!-- Faculty Stats -->
-    <div class="card">
-        <h3>Total Students</h3>
-        <div class="stat-value" style="color: var(--primary);">{{ stats.get('student_count', 0) }}</div>
-        <p class="text-secondary" style="margin-top: 0.5rem; font-size: 0.85rem;">Under your department</p>
+    <div class="dashboard-metrics">
+        <article class="metric-card metric-card-primary">
+            <div class="metric-label">Students</div>
+            <div class="metric-value">{{ stats.get('student_count', 0) }}</div>
+            <div class="metric-meta">Students available in attendance workflows</div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-label">Active QR Sessions</div>
+            <div class="metric-value">{{ stats.get('active_qr_sessions', 0) }}</div>
+            <div class="metric-meta">Open attendance sessions created by you</div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-label">Priority View</div>
+            <div class="metric-value metric-value-sm">Teaching</div>
+            <div class="metric-meta">Attendance, scanning, and student support</div>
+        </article>
     </div>
 
-    <div class="card">
-        <h3>Quick Mark</h3>
-        <p class="text-secondary" style="font-size: 0.9rem;">Mark today's attendance for your class.</p>
-        <a href="/attendance" class="btn btn-primary" style="margin-top: 1.5rem; text-decoration: none;">Mark Attendance</a>
+    <div class="dashboard-layout">
+        <section class="card dashboard-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-kicker">Fast Actions</div>
+                    <h3>Teaching controls</h3>
+                </div>
+            </div>
+            <div class="action-grid">
+                <a href="/attendance" class="action-card">
+                    <strong>Manual attendance</strong>
+                    <span>Mark present students for today’s class.</span>
+                </a>
+                <a href="/qr-attendance" class="action-card">
+                    <strong>Start QR attendance</strong>
+                    <span>Generate a live QR session with location check.</span>
+                </a>
+                <a href="/risk-analysis" class="action-card">
+                    <strong>Review at-risk students</strong>
+                    <span>Check attendance and performance concerns.</span>
+                </a>
+                <a href="/manage-fees" class="action-card">
+                    <strong>Fee operations</strong>
+                    <span>Inspect and update student fee records.</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="card dashboard-panel spotlight-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-kicker">Today</div>
+                    <h3>Faculty focus</h3>
+                </div>
+            </div>
+            <ul class="spotlight-list">
+                <li>
+                    <strong>Launch the QR flow before class starts.</strong>
+                    <span>Students need enough time to scan while the token is fresh.</span>
+                </li>
+                <li>
+                    <strong>Use risk analysis after attendance closes.</strong>
+                    <span>That gives you a quick picture of students drifting behind.</span>
+                </li>
+                <li>
+                    <strong>Keep manual attendance as fallback.</strong>
+                    <span>It covers students with camera or location permission issues.</span>
+                </li>
+            </ul>
+        </section>
     </div>
 
     {% elif session['role'] == 'admin' %}
-    <!-- Admin Stats -->
-    <div class="card">
-        <h3>User Distribution</h3>
-        <div style="margin-top: 1rem;">
-            {% for item in stats.get('user_stats', []) %}
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem;">
-                <span style="text-transform: capitalize; color: var(--text-secondary); font-size: 0.9rem;">{{ item.role }}s</span>
-                <span style="font-weight: 700; color: var(--primary);">{{ item.count }}</span>
-            </div>
-            {% endfor %}
-        </div>
+    <div class="dashboard-metrics">
+        <article class="metric-card metric-card-primary">
+            <div class="metric-label">Books in Library</div>
+            <div class="metric-value">{{ stats.get('total_books', 0) }}</div>
+            <div class="metric-meta">Total catalog items available in the system</div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-label">Platform Status</div>
+            <div class="metric-value metric-value-sm">Active</div>
+            <div class="metric-meta">Database and workflows available</div>
+        </article>
+        <article class="metric-card">
+            <div class="metric-label">Control Surface</div>
+            <div class="metric-value metric-value-sm">Admin</div>
+            <div class="metric-meta">User, fee, event, and academic oversight</div>
+        </article>
     </div>
 
-    <div class="card">
-        <h3>System Status</h3>
-        <div class="stat-value" style="color: var(--secondary);">Active</div>
-        <p class="text-success" style="margin-top: 0.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span style="width: 8px; height: 8px; background: #4caf50; border-radius: 50%;"></span>
-            Database Connected
-        </p>
+    <div class="dashboard-layout">
+        <section class="card dashboard-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-kicker">User Mix</div>
+                    <h3>Distribution snapshot</h3>
+                </div>
+            </div>
+            <div class="distribution-list">
+                {% for item in stats.get('user_stats', []) %}
+                <div class="distribution-row">
+                    <span>{{ item.role | capitalize }}s</span>
+                    <strong>{{ item.count }}</strong>
+                </div>
+                {% else %}
+                <div class="distribution-row">
+                    <span>No users found</span>
+                    <strong>0</strong>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="card dashboard-panel">
+            <div class="panel-header">
+                <div>
+                    <div class="panel-kicker">Operations</div>
+                    <h3>Administrative actions</h3>
+                </div>
+            </div>
+            <div class="action-stack">
+                <a href="/admin-panel" class="action-card">
+                    <strong>Manage users</strong>
+                    <span>Review roles and create non-admin accounts.</span>
+                </a>
+                <a href="/manage-fees" class="action-card">
+                    <strong>Handle fees</strong>
+                    <span>Update payment status and send reminders.</span>
+                </a>
+                <a href="/events" class="action-card">
+                    <strong>Coordinate events</strong>
+                    <span>Check participation and keep schedules current.</span>
+                </a>
+            </div>
+        </section>
     </div>
     {% endif %}
-</div>
-
-<div class="page-load" style="margin-top: 2rem; animation-delay: 0.2s;">
-    <!-- Quick Links -->
-    <div class="card">
-        <h3>Quick Actions</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
-            <a href="/events" class="btn btn-primary" style="text-decoration: none;">Events</a>
-            {% if session['role'] != 'admin' %}
-            <a href="/attendance" class="btn btn-outline" style="text-decoration: none;">Attendance</a>
-            {% else %}
-            <a href="/admin-panel" class="btn btn-outline" style="text-decoration: none;">Manage Users</a>
-            {% endif %}
-        </div>
-    </div>
-</div>
+</section>
 {% endblock %}
 
 {% block scripts %}
 {% if session['role'] == 'student' %}
 <script>
-    const ctx = document.getElementById('performanceChart')?.getContext('2d');
-    if (ctx) {
-        const performanceData = {{ stats.get('performance', []) | tojson
-    }};
+const ctx = document.getElementById('performanceChart')?.getContext('2d');
+if (ctx) {
+    const performanceData = {{ stats.get('performance', []) | tojson }};
     if (performanceData.length > 0) {
         new Chart(ctx, {
             type: 'bar',
@@ -103,14 +286,16 @@
                 datasets: [{
                     label: 'Marks Obtained',
                     data: performanceData.map(p => p.marks_obtained),
-                    backgroundColor: 'rgba(79, 70, 229, 0.6)',
-                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(25, 118, 210, 0.72)',
+                    borderColor: '#1976d2',
+                    borderRadius: 10,
                     borderWidth: 1
                 }, {
                     label: 'Total Marks',
                     data: performanceData.map(p => p.total_marks),
-                    backgroundColor: 'rgba(148, 163, 184, 0.1)',
-                    borderColor: 'rgba(148, 163, 184, 0.5)',
+                    backgroundColor: 'rgba(207, 216, 220, 0.45)',
+                    borderColor: 'rgba(84, 110, 122, 0.35)',
+                    borderRadius: 10,
                     borderWidth: 1
                 }]
             },
@@ -118,16 +303,25 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(33, 33, 33, 0.08)' },
+                        ticks: { color: '#607d8b' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#607d8b' }
+                    }
                 },
                 plugins: {
-                    legend: { labels: { color: '#94a3b8' } }
+                    legend: {
+                        labels: { color: '#455a64' }
+                    }
                 }
             }
         });
     }
-    }
+}
 </script>
 {% endif %}
 {% endblock %}
