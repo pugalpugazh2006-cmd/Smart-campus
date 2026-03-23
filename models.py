@@ -62,7 +62,16 @@ class Attendance(db.Model):
     distance_m = db.Column(db.Float)
 
     def to_dict(self):
-        return {'doc_id': self.id, 'student_id': self.student_id, 'date': self.date, 'status': self.status, 'marked_by': self.marked_by, 'faculty_name': self.faculty_name, 'distance_m': self.distance_m}
+        return {
+            'doc_id': self.id,
+            'student_id': self.student_id,
+            'date': self.date,
+            'status': self.status,
+            'marked_by': self.marked_by,
+            'faculty_name': self.faculty_name,
+            'verified_at': self.verified_at,
+            'distance_m': self.distance_m
+        }
 
 class Fee(db.Model):
     __tablename__ = 'fees'

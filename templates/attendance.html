@@ -92,6 +92,7 @@
                             <tr style="text-align: left; border-bottom: 2px solid var(--border);">
                                 <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Date</th>
                                 <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Status</th>
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Method</th>
                                 <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Marked By</th>
                             </tr>
                         </thead>
@@ -104,6 +105,17 @@
                                         {{ record.status | upper }}
                                     </span>
                                 </td>
+                                <td style="padding: 1rem;">
+                                    {% if record.verified_at %}
+                                    <span class="badge bg-success" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        <i data-lucide="qr-code" style="width: 10px; margin-right: 4px;"></i>QR
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        MANUAL
+                                    </span>
+                                    {% endif %}
+                                </td>
                                 <td style="padding: 1rem; color: var(--text-secondary);">{{ record.faculty_name }}</td>
                             </tr>
                             {% endfor %}
@@ -115,4 +127,4 @@
         {% endif %}
     </div>
 </div>
-{% endblock %}
+{% endblock %}

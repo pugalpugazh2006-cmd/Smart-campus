@@ -459,8 +459,8 @@ def verify_attendance():
     )
     print(f"[DEBUG] Calculated Distance: {distance}m", flush=True)
     
-    # Radius check (Increased to 500 meters)
-    if distance > 500: 
+    # Students must be within 100 meters of the faculty location.
+    if distance > 100:
         msg = f"Out of range! You are {round(distance)}m away from the classroom zone."
         print(f"[DEBUG] Verification Failed: {msg}", flush=True)
         return {"status": "error", "message": msg}, 403
