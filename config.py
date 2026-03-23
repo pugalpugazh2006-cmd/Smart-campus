@@ -6,9 +6,17 @@ load_dotenv()
 
 class Config:
     ENV = os.environ.get('FLASK_ENV', 'production')
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-me'
+    SECRET_KEY = (
+        os.environ.get('SECRET_KEY')
+        or os.environ.get('smart_campus_SECRET_KEY')
+        or 'dev-secret-key-change-me'
+    )
 
-    DATABASE_URL = os.environ.get('DATABASE_URL')
+    DATABASE_URL = (
+        os.environ.get('DATABASE_URL')
+        or os.environ.get('smart_campus_DATABASE_URL')
+        or os.environ.get('smart_campus_POSTGRES_URL')
+    )
     VERCEL = os.environ.get('VERCEL') == '1'
     IS_PRODUCTION = ENV == 'production' or VERCEL
 
