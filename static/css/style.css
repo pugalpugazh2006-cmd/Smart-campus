@@ -53,6 +53,10 @@ body {
     background-color: var(--background);
 }
 
+body.sidebar-open {
+    overflow: hidden;
+}
+
 /* Sidebar Styling */
 .sidebar {
     width: 260px;
@@ -64,6 +68,10 @@ body {
     flex-direction: column;
     border-right: 1px solid var(--border);
     z-index: 100;
+}
+
+.sidebar-overlay {
+    display: none;
 }
 
 .sidebar-header {
@@ -156,6 +164,17 @@ body {
     position: sticky;
     top: 0;
     z-index: 90;
+}
+
+.top-navbar-start {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.menu-toggle {
+    display: none;
 }
 
 .college-name {
@@ -452,6 +471,10 @@ body {
     gap: 1.5rem;
 }
 
+.table-responsive {
+    overflow-x: auto;
+}
+
 /* Badges */
 .badge {
     padding: 4px 12px;
@@ -462,4 +485,116 @@ body {
 
 .bg-success { background: #c8e6c9; color: #2e7d32; }
 .bg-danger { background: #ffcdd2; color: #c62828; }
-.bg-info { background: #e1f5fe; color: #0277bd; }
+.bg-info { background: #e1f5fe; color: #0277bd; }
+.bg-secondary { background: #eceff1; color: #455a64; }
+
+@media (max-width: 991px) {
+    .menu-toggle {
+        display: inline-flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        height: 100vh;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        box-shadow: var(--shadow-3);
+    }
+
+    .sidebar.sidebar-open {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.4);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+        z-index: 95;
+    }
+
+    .sidebar-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .main-content {
+        padding: 1.25rem;
+    }
+
+    .top-navbar {
+        padding: 0 1rem;
+    }
+
+    .college-name {
+        font-size: 0.78rem;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .notification-dropdown {
+        right: 0;
+        left: auto;
+        width: min(320px, calc(100vw - 2rem));
+    }
+}
+
+@media (max-width: 767px) {
+    .auth-wrapper {
+        padding: 1rem;
+        align-items: flex-start;
+    }
+
+    .auth-card,
+    .card {
+        border-radius: 10px;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+
+    .content-container {
+        max-width: 100%;
+    }
+
+    .grid-dashboard {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .grid-dashboard > .card[style*="grid-column: span 2"] {
+        grid-column: auto !important;
+    }
+
+    .top-navbar {
+        height: auto;
+        min-height: 64px;
+    }
+
+    .navbar-actions {
+        gap: 0.5rem;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 1rem;
+    }
+
+    .d-flex.justify-content-end.gap-2.mt-4.pt-3 {
+        flex-direction: column;
+    }
+}

@@ -71,8 +71,7 @@ sql_db.init_app(app)
 def initialize_database():
     with app.app_context():
         sql_db.create_all()
-
-initialize_database()
+        ensure_default_admin()
 
 db = MockDB()
 User = Query()
@@ -113,8 +112,29 @@ def create_user_account(username, email, password, role, full_name, roll_number=
             'full_name': full_name,
             'department': department or 'General'
         })
+    elif role == 'admin':
+        db.table('admin_profiles').insert({
+            'user_id': user_id,
+            'full_name': full_name,
+            'title': 'System Admin'
+        })
 
     return user_id
+
+def ensure_default_admin():
+    admin_user = db.table('users').get(where('role') == 'admin')
+    if admin_user:
+        return admin_user.doc_id
+
+    return create_user_account(
+        username='admin',
+        email='admin@smartcampus.com',
+        password='admin123',
+        role='admin',
+        full_name='Administrator'
+    )
+
+initialize_database()
 
 # Login required decorator
 def login_required(f):
@@ -966,6 +986,10 @@ def add_user():
     if not all([username, email, password, role, full_name]):
         flash('All basic fields are required!', 'danger')
         return redirect(url_for('admin_panel'))
+
+    if role == 'admin' and db.table('users').get(where('role') == 'admin'):
+        flash('Only one admin account is allowed.', 'danger')
+        return redirect(url_for('admin_panel'))
     
     # Check if user exists
     if db.table('users').get(User.username == username) or db.table('users').get(where('email') == email):
@@ -982,13 +1006,6 @@ def add_user():
         department=request.form.get('department') or 'TBD'
     )
 
-    if role == 'admin':
-        db.table('admin_profiles').insert({
-            'user_id': user_id,
-            'full_name': full_name,
-            'title': 'System Admin'
-        })
-        
     flash(f'User {username} added successfully!', 'success')
     return redirect(url_for('admin_panel'))
 

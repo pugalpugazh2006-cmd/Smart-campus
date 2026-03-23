@@ -76,7 +76,7 @@
     <!-- Quick Links -->
     <div class="card">
         <h3>Quick Actions</h3>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
             <a href="/events" class="btn btn-primary" style="text-decoration: none;">Events</a>
             {% if session['role'] != 'admin' %}
             <a href="/attendance" class="btn btn-outline" style="text-decoration: none;">Attendance</a>
