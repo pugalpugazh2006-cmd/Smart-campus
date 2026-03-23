@@ -1,6 +1,5 @@
 from app import app
 
 
-# Vercel Python runtime expects an application object exported from the
-# serverless entrypoint.
+# Vercel's Flask runtime expects a WSGI app object named `app`.
 handler = app
