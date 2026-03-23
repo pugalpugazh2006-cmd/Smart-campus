@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-load">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 style="font-weight: 700;">Campus Transport</h1>
+        {% if session.role == 'admin' %}
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTransportModal">+ Add New Route</button>
+        {% endif %}
+    </div>
+
+    {% if my_bus %}
+    <div class="card border-primary mb-4" style="background: rgba(25, 118, 210, 0.04);">
+        <h5 style="color: var(--primary); font-weight: 700; margin-bottom: 1.5rem;">My Assigned Bus: {{ my_bus.bus_no }}</h5>
+        <div class="grid-dashboard" style="grid-template-columns: repeat(3, 1fr);">
+            <div>
+                <strong style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Route</strong><br>
+                <span style="font-weight: 600;">{{ my_bus.route }}</span>
+            </div>
+            <div>
+                <strong style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Driver</strong><br>
+                <span style="font-weight: 600;">{{ my_bus.driver }}</span>
+            </div>
+            <div>
+                <strong style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Timing</strong><br>
+                <span style="font-weight: 600;">{{ my_bus.timing }}</span>
+            </div>
+        </div>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+            <small style="color: var(--text-secondary);">Driver Contact: <span style="color: var(--text-primary); font-weight: 600;">{{ my_bus.contact }}</span></small>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 600;">All Bus Routes</h3>
+        <div class="table-responsive">
+            <table class="table-hover" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                        <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Bus No</th>
+                        <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Route</th>
+                        <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Driver</th>
+                        <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Timing</th>
+                        <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Status</th>
+                        {% if session.role == 'admin' %}
+                        <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bus in buses %}
+                    <tr style="border-bottom: 1px solid var(--border);">
+                        <td style="padding: 1rem;"><span class="badge bg-info">{{ bus.bus_no }}</span></td>
+                        <td style="padding: 1rem; font-weight: 500;">{{ bus.route }}</td>
+                        <td style="padding: 1rem; color: var(--text-secondary);">{{ bus.driver }}</td>
+                        <td style="padding: 1rem; font-weight: 600;">{{ bus.timing }}</td>
+                        <td style="padding: 1rem;"><span class="badge bg-success">On Schedule</span></td>
+                        {% if session.role == 'admin' %}
+                        <td style="padding: 1rem;">
+                            <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;" onclick="assignBus('{{ bus.doc_id }}')">Assign</button>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Transport Modal -->
+<div class="modal fade" id="addTransportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="card modal-content" style="border: none; padding: 0;">
+            <form action="{{ url_for('add_transport') }}" method="POST">
+                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <h5 style="margin: 0; font-weight: 700;">Add Transport Route</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div style="padding: 1.5rem;">
+                    <div class="mb-3">
+                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Bus Number</label>
+                        <input type="text" name="bus_no" class="form-control" required placeholder="e.g. B-05">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Route Details</label>
+                        <textarea name="route" class="form-control" required placeholder="e.g. West Gate - Hostel C - Library"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Driver Name</label>
+                            <input type="text" name="driver" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Contact</label>
+                            <input type="text" name="contact" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Timing</label>
+                        <input type="text" name="timing" class="form-control" required placeholder="e.g. 08:30 AM">
+                    </div>
+                </div>
+                <div style="padding: 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Route</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}QR Scan Attendance - Smart Campus{% endblock %}
+
+{% block head %}
+<script src="https://unpkg.com/html5-qrcode"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-load" style="max-width: 600px; margin: 0 auto;">
+    <div class="card" style="text-align: center; padding: 2.5rem;">
+        <div style="width: 70px; height: 70px; background: rgba(25, 118, 210, 0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <i data-lucide="camera" style="width: 35px; height: 35px;"></i>
+        </div>
+        
+        <h2 style="font-weight: 800; margin-bottom: 0.5rem;">QR Attendance Scanner</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">
+            Scan the professor's QR code to verify your presence.
+        </p>
+
+        <!-- Scanner Container -->
+        <div id="reader" style="width: 100%; border-radius: 12px; overflow: hidden; border: none; background: #000; margin-bottom: 2rem;"></div>
+
+        <div id="scanner-status" class="alert alert-info" style="display: none; margin-bottom: 1.5rem;">
+            Scanning...
+        </div>
+
+        <div class="card" style="background: var(--background); border: 1px dashed var(--primary); padding: 1.5rem; text-align: left;">
+            <h4 style="font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; font-size: 1rem;">Scanning Tips:</h4>
+            <ul style="color: var(--text-secondary); font-size: 0.85rem; padding-left: 1.25rem; margin: 0;">
+                <li style="margin-bottom: 0.25rem;">Ensure sufficient lighting in the classroom.</li>
+                <li style="margin-bottom: 0.25rem;">Hold your phone steady and center the QR code.</li>
+                <li>Stay within range of the faculty's location.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function onScanSuccess(decodedText, decodedResult) {
+        // Handle the scanned URL
+        console.log(`Code matched = ${decodedText}`, decodedResult);
+        
+        // Stop scanner after success
+        html5QrcodeScanner.clear().then(_ => {
+            const statusEl = document.getElementById('scanner-status');
+            statusEl.innerText = "QR Detected! Redirecting for verification...";
+            statusEl.className = "alert alert-success";
+            statusEl.style.display = "block";
+            
+            // Redirect to the URL (should be /scan-qr/<token>)
+            window.location.href = decodedText;
+        }).catch(error => {
+            console.warn("Failed to clear scanner", error);
+            window.location.href = decodedText;
+        });
+    }
+
+    function onScanFailure(error) {
+        // console.warn(`Code scan error = ${error}`);
+    }
+
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", 
+        { 
+            fps: 10, 
+            qrbox: {width: 250, height: 250},
+            aspectRatio: 1.0,
+            showTorchButtonIfSupported: true
+        }, 
+        /* verbose= */ false
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+    // Apply custom styling to the library's elements
+    setTimeout(() => {
+        const startBtn = document.getElementById('html5-qrcode-button-camera-start');
+        if(startBtn) {
+            startBtn.classList.add('btn', 'btn-primary');
+            startBtn.style.marginTop = '1rem';
+        }
+        const stopBtn = document.getElementById('html5-qrcode-button-camera-stop');
+        if(stopBtn) {
+            stopBtn.classList.add('btn', 'btn-outline');
+            stopBtn.style.marginTop = '1rem';
+        }
+        const permBtn = document.getElementById('html5-qrcode-button-camera-permission');
+        if(permBtn) {
+            permBtn.classList.add('btn', 'btn-primary');
+        }
+    }, 500);
+</script>
+
+<style>
+    #reader__scan_region video {
+        border-radius: 12px !important;
+        object-fit: cover !important;
+    }
+    #reader img {
+        display: none !important;
+    }
+    #reader__dashboard_section_csr button {
+        margin: 5px;
+    }
+    #reader {
+        border: 2px solid var(--border) !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Offline - Smart Campus{% endblock %}
+
+{% block auth_content %}
+<div class="card auth-card" style="width: 100%; max-width: 400px; padding: 2.5rem; text-align: center;">
+    <div class="logo" style="margin-bottom: 2rem; font-size: 1.5rem; color: var(--text-secondary);">
+        <i data-lucide="wifi-off" style="width: 48px; height: 48px; margin-bottom: 1rem;"></i>
+        <br>
+        SMART CAMPUS
+    </div>
+    <h2 style="margin-bottom: 1rem; font-weight: 600;">You are Offline</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+        It looks like you've lost your internet connection. Please check your network and try again to continue using the Smart Campus app.
+    </p>
+
+    <button onclick="window.location.reload()" class="btn btn-primary" style="width: 100%;">
+        <i data-lucide="refresh-cw" style="margin-right: 0.5rem; width: 18px; height: 18px;"></i>
+        Try Again
+    </button>
+</div>
+{% endblock %}

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Campus{% endblock %}</title>
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1976d2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/static/img/icon-192.png">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    {% if session.get('user_id') %}
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">SMART CAMPUS</div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="nav-item">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="/attendance" class="nav-item">
+                    <i data-lucide="check-square"></i>
+                    <span>Attendance</span>
+                </a>
+                
+                {% if session['role'] == 'student' %}
+                <a href="/qr-scan" class="nav-item">
+                    <i data-lucide="qr-code"></i>
+                    <span>QR Scan</span>
+                </a>
+                {% endif %}
+                <a href="/library" class="nav-item">
+                    <i data-lucide="book-open"></i>
+                    <span>Library</span>
+                </a>
+                <a href="/transport" class="nav-item">
+                    <i data-lucide="bus"></i>
+                    <span>Transport</span>
+                </a>
+                <a href="/performance-analyzer" class="nav-item">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Performance</span>
+                </a>
+                <a href="/events" class="nav-item">
+                    <i data-lucide="calendar"></i>
+                    <span>Events</span>
+                </a>
+                <a href="/syllabus" class="nav-item">
+                    <i data-lucide="book-open"></i>
+                    <span>Syllabus</span>
+                </a>
+                
+                <div class="nav-divider"></div>
+                
+                {% if session.get('role') in ['admin', 'faculty'] %}
+                <a href="/manage-fees" class="nav-item">
+                    <i data-lucide="wallet"></i>
+                    <span>Manage Fees</span>
+                </a>
+                <a href="/risk-analysis" class="nav-item">
+                    <i data-lucide="alert-triangle"></i>
+                    <span>Risk Analysis</span>
+                </a>
+                {% endif %}
+                
+                {% if session.get('role') == 'faculty' %}
+                <a href="/qr-attendance" class="nav-item">
+                    <i data-lucide="qr-code"></i>
+                    <span>QR Attendance</span>
+                </a>
+                {% endif %}
+                
+                {% if session.get('role') == 'admin' %}
+                <a href="/admin-panel" class="nav-item">
+                    <i data-lucide="shield-check"></i>
+                    <span>Admin Panel</span>
+                </a>
+                {% endif %}
+                
+                <div class="mt-auto">
+                    <a href="/logout" class="nav-item logout-link">
+                        <i data-lucide="log-out"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <div class="main-wrapper">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div class="college-name">CITY TECHNICAL COLLEGE</div>
+                <div class="navbar-actions">
+                    <button class="icon-btn ripple-btn" title="Notifications" id="notif-trigger">
+                        <i data-lucide="bell"></i>
+                        <span class="notification-badge"></span>
+                    </button>
+                    
+                    <!-- Notification Dropdown -->
+                    <div class="notification-dropdown" id="notif-dropdown">
+                        <div class="dropdown-header">
+                            <span>Notifications</span>
+                            <span class="badge bg-info">2 New</span>
+                        </div>
+                        <div class="notification-list">
+                            <div class="notification-item">
+                                <div class="notif-icon"><i data-lucide="info"></i></div>
+                                <div class="notif-content">
+                                    <div class="notif-title">Fee Reminder</div>
+                                    <div class="notif-desc">Your semester fee is due by next Friday.</div>
+                                    <div class="notif-time">2 hours ago</div>
+                                </div>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notif-icon"><i data-lucide="calendar"></i></div>
+                                <div class="notif-content">
+                                    <div class="notif-title">New Event</div>
+                                    <div class="notif-desc">Annual Tech Fest registrations are now open.</div>
+                                    <div class="notif-time">5 hours ago</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-footer">
+                            <a href="#" class="view-all-link">View All Notifications</a>
+                        </div>
+                    </div>
+
+                    <a href="/profile" class="profile-trigger ripple-btn" title="My Profile">
+                        <i data-lucide="user-circle"></i>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="main-content">
+                <div class="content-container page-load">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+    {% else %}
+    <div class="auth-wrapper page-load">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="alert-container" style="max-width: 400px; width: 90%; margin-bottom: 1rem;">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% block auth_content %}{% endblock %}
+    </div>
+    {% endif %}
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+
+        // Custom Ripple Effect
+        document.addEventListener('click', function (e) {
+            const rippleTarget = e.target.closest('.btn, .nav-item, .ripple-btn');
+            if (rippleTarget) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple-js');
+                
+                const rect = rippleTarget.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                
+                rippleTarget.appendChild(ripple);
+                setTimeout(() => ripple.remove(), 600);
+            }
+        });
+
+        // Notification Toggle
+        const notifTrigger = document.getElementById('notif-trigger');
+        const notifDropdown = document.getElementById('notif-dropdown');
+
+        if (notifTrigger && notifDropdown) {
+            notifTrigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notifDropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!notifDropdown.contains(e.target) && e.target !== notifTrigger) {
+                    notifDropdown.classList.remove('active');
+                }
+            });
+        }
+
+        // Set active nav link
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(link => {
+            const path = window.location.pathname;
+            const href = link.getAttribute('href');
+            if (path === href || (path === '/' && href === '/dashboard')) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+db.json
+.env
+instance/
+*.db
+notifications.log
+FINAL_DEPLOY/
+*.zip
+static/img/icon-*.png

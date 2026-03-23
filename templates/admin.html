@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Smart Campus{% endblock %}
+
+{% block content %}
+<div class="card page-load">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" style="font-weight: 700; color: var(--text-primary);">User Management</h2>
+        <button class="btn btn-primary" onclick="document.getElementById('createUserModal').style.display='flex'">+ Add New User</button>
+    </div>
+    <div class="table-responsive">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">ID</th>
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Username</th>
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Email</th>
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 1rem; font-weight: 500;">#{{ user.id }}</td>
+                    <td style="padding: 1rem; font-weight: 600;">{{ user.username }}</td>
+                    <td style="padding: 1rem; color: var(--text-secondary);">{{ user.email }}</td>
+                    <td style="padding: 1rem;">
+                        <span class="badge {{ 'bg-info' if user.role == 'admin' else ('bg-success' if user.role == 'faculty' else 'bg-secondary') }}">
+                            {{ user.role | upper }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Material Modal -->
+<div id="createUserModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+    <div class="card" style="width:500px; padding:2rem; animation: fadeInSlideUp 0.3s ease-out;">
+        <h3 style="margin-bottom: 1.5rem; font-weight: 700;">Create New User</h3>
+        <form action="/add-user" method="POST">
+            <div class="mb-3">
+                <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Full Name</label>
+                <input type="text" name="full_name" class="form-control" required placeholder="John Doe">
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Username</label>
+                    <input type="text" name="username" class="form-control" required placeholder="johndoe123">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Email</label>
+                    <input type="email" name="email" class="form-control" required placeholder="john@example.com">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Password</label>
+                    <input type="password" name="password" class="form-control" required placeholder="••••••••">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Role</label>
+                    <select name="role" id="roleSelect" class="form-control" onchange="toggleRoleFields()">
+                        <option value="student">Student</option>
+                        <option value="faculty">Faculty</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="studentFields">
+                <div class="mb-3">
+                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Roll Number</label>
+                    <input type="text" name="roll_number" class="form-control" placeholder="STU1001">
+                </div>
+            </div>
+            
+            <div id="facultyFields" style="display:none;">
+                <div class="mb-3">
+                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Department</label>
+                    <input type="text" name="department" class="form-control" placeholder="Engineering">
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top: 1px solid var(--border);">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('createUserModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleRoleFields() {
+    const role = document.getElementById('roleSelect').value;
+    document.getElementById('studentFields').style.display = (role === 'student') ? 'block' : 'none';
+    document.getElementById('facultyFields').style.display = (role === 'faculty') ? 'block' : 'none';
+}
+</script>
+{% endblock %}

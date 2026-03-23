@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Verifying Location - Smart Campus{% endblock %}
+
+{% block content %}
+<div class="page-load" style="display: flex; align-items: center; justify-content: center; min-height: 70vh;">
+    <div class="card" style="max-width: 450px; text-align: center; padding: 3rem;">
+        <div id="status-icon" style="margin-bottom: 2rem;">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        
+        <h2 id="status-title" style="font-weight: 700; margin-bottom: 1rem;">Verifying Location</h2>
+        <p id="status-desc" style="color: var(--text-secondary); line-height: 1.6;">
+            We are checking if you are physically present for <strong>{{ subject }}</strong>. Please ensure your GPS is enabled.
+        </p>
+
+        <div id="action-area" style="margin-top: 2rem;">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+</div>
+
+<script>
+const token = "{{ token }}";
+
+function verify() {
+    console.log("Starting location verification...");
+    if (navigator.geolocation) {
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            async (pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                console.log(`Location captured: ${lat}, ${lng}`);
+                
+                const formData = new FormData();
+                formData.append('token', token);
+                formData.append('latitude', lat);
+                formData.append('longitude', lng);
+
+                try {
+                    const response = await fetch('/verify-attendance', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showSuccess(result.message);
+                    } else {
+                        showError(result.message || "Out of range! Please stay within the classroom.");
+                    }
+                } catch (err) {
+                    showError("Unable to connect to server. Check your internet connection.");
+                }
+            },
+            (err) => {
+                console.error("Geolocation error:", err);
+                let errorMsg = "Location access denied. Please enable GPS.";
+                if (err.code === 3) errorMsg = "Location request timed out. Try moving near a window.";
+                showError(errorMsg);
+            },
+            options
+        );
+    } else {
+        showError("Geolocation is not supported by your browser.");
+    }
+}
+
+function showSuccess(msg) {
+    document.getElementById('status-icon').innerHTML = '<i data-lucide="check-circle-2" style="width: 64px; height: 64px; color: #4caf50;"></i>';
+    document.getElementById('status-title').innerText = "Attendance Marked!";
+    document.getElementById('status-desc').innerText = msg;
+    document.getElementById('action-area').innerHTML = '<a href="/attendance" class="btn btn-primary w-100">View History</a>';
+    lucide.createIcons();
+}
+
+function showError(msg) {
+    document.getElementById('status-icon').innerHTML = '<i data-lucide="alert-circle" style="width: 64px; height: 64px; color: var(--danger);"></i>';
+    document.getElementById('status-title').innerText = "Verification Failed";
+    document.getElementById('status-desc').innerText = msg;
+    document.getElementById('action-area').innerHTML = '<button onclick="location.reload()" class="btn btn-outline w-100">Try Again</button>';
+    lucide.createIcons();
+}
+
+// Start verification on load
+setTimeout(verify, 1500);
+</script>
+{% endblock %}

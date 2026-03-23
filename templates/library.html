@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-load">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 style="font-weight: 700; color: var(--text-primary);">Library Management</h1>
+        {% if session.role in ['admin', 'faculty'] %}
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookModal">+ Add New Book</button>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <!-- Book List -->
+        <div class="col-md-8">
+            <div class="row g-4">
+                {% for book in books %}
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <h5 style="margin: 0; font-weight: 700;">{{ book.title }}</h5>
+                            <span class="badge bg-info">{{ book.category }}</span>
+                        </div>
+                        <p style="color: var(--text-secondary); margin-bottom: 0.25rem; font-size: 0.95rem;">by {{ book.author }}</p>
+                        <p style="color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 0.5px; opacity: 0.7;">ISBN: {{ book.isbn }}</p>
+                        
+                        <div style="margin-top: auto; padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border);">
+                            <span style="font-size: 0.85rem; font-weight: 600; color: {{ '#2e7d32' if book.is_available else '#c62828' }};">
+                                {{ 'Available' if book.is_available else 'Borrowed' }}
+                            </span>
+                            {% if session.role == 'student' %}
+                            <form action="{{ url_for('borrow_book', book_id=book.id) }}" method="POST">
+                                <button type="submit" class="btn btn-outline" style="padding: 0.4rem 1rem; font-size: 0.75rem;" {{ 'disabled' if not book.is_available }}>Borrow</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            {% if session.role == 'student' %}
+            <div class="card mb-4" style="padding: 0;">
+                <div style="padding: 1.25rem; border-bottom: 1px solid var(--border);">
+                    <h5 style="margin: 0; font-weight: 600;">My Borrowed Books</h5>
+                </div>
+                <div style="padding: 1rem;">
+                    {% if my_books %}
+                    {% for record in my_books %}
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border);">
+                        <div>
+                            <h6 style="margin: 0; font-weight: 600;">{{ record.title }}</h6>
+                            <small style="color: var(--text-secondary);">{{ record.borrow_date[:10] }}</small>
+                        </div>
+                        <form action="{{ url_for('return_book', record_id=record.id) }}" method="POST">
+                            <button type="submit" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.7rem; color: var(--primary);">Return</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; text-align: center; margin: 1rem 0;">No books borrowed.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <h5 style="font-weight: 600; margin-bottom: 1rem;">Library Insights</h5>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-secondary);">Total Inventory</span>
+                    <span style="font-weight: 700;">{{ books|length }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">Active Categories</span>
+                    <span style="font-weight: 700;">4</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Book Modal -->
+<div class="modal fade" id="addBookModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="card modal-content" style="border: none; padding: 0;">
+            <form action="{{ url_for('add_book') }}" method="POST">
+                <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                    <h5 style="margin: 0; font-weight: 700;">Add New Book</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div style="padding: 1.5rem;">
+                    <div class="mb-3">
+                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Title</label>
+                        <input type="text" name="title" class="form-control" required placeholder="Introduction to Algorithms">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Author</label>
+                            <input type="text" name="author" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">ISBN</label>
+                            <input type="text" name="isbn" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Category</label>
+                            <select name="category" class="form-control">
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Mathematics">Mathematics</option>
+                                <option value="Physics">Physics</option>
+                                <option value="Literature">Literature</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Copies</label>
+                            <input type="number" name="copies" class="form-control" value="1" min="1">
+                        </div>
+                    </div>
+                </div>
+                <div style="padding: 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem;">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

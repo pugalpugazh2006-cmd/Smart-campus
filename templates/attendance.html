@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance - Smart Campus{% endblock %}
+
+{% block content %}
+<div class="page-load">
+    <div class="row">
+        {% if session['role'] == 'faculty' %}
+        <div class="col-md-5">
+            <div class="card h-100">
+                <h2 style="font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary); font-size: 1.25rem;">Mark Attendance</h2>
+                <p class="text-secondary mb-4" style="font-size: 0.85rem;">Select students present in today's manual session.</p>
+                
+                <form action="/mark-attendance" method="POST">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tbody>
+                                {% for student in students %}
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td style="padding: 0.75rem 0;">
+                                        <div style="font-weight: 600; font-size: 0.9rem;">{{ student.full_name }}</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ student.roll_number }}</div>
+                                    </td>
+                                    <td style="padding: 0.75rem 0; text-align: right;">
+                                        <input type="checkbox" name="attendance" value="{{ student.user_id }}" style="width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;"> 
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-4" style="padding: 0.8rem;">Submit Manual Entry</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card h-100">
+                <h2 style="font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary); font-size: 1.25rem;">Recent Attendance</h2>
+                <p class="text-secondary mb-4" style="font-size: 0.85rem;">Including QR-scanned and manual entries.</p>
+                
+                <div class="table-responsive">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                                <th style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Student</th>
+                                <th style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Date</th>
+                                <th style="padding: 0.75rem; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in history %}
+                            <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
+                                <td style="padding: 1rem 0.75rem;">
+                                    <div style="font-weight: 600; font-size: 0.9rem;">{{ record.student_name }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ record.roll_number }}</div>
+                                </td>
+                                <td style="padding: 1rem 0.75rem; font-size: 0.85rem;">{{ record.date }}</td>
+                                <td style="padding: 1rem 0.75rem;">
+                                    {% if record.verified_at %}
+                                    <span class="badge bg-success" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        <i data-lucide="qr-code" style="width: 10px; margin-right: 4px;"></i>QR SCAN
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        MANUAL
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" style="text-align: center; padding: 3rem; color: var(--text-secondary); font-size: 0.9rem;">
+                                    No attendance records found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Student View -->
+        <div class="col-12">
+            <div class="card">
+                <h2 style="font-weight: 700; margin-bottom: 2rem;">My Attendance History</h2>
+                <div class="table-responsive">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Date</th>
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Status</th>
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Marked By</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 1rem; font-weight: 600;">{{ record.date }}</td>
+                                <td style="padding: 1rem;">
+                                    <span class="badge {{ 'bg-success' if record.status == 'Present' else 'bg-danger' }}">
+                                        {{ record.status | upper }}
+                                    </span>
+                                </td>
+                                <td style="padding: 1rem; color: var(--text-secondary);">{{ record.faculty_name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-load">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 style="font-weight: 700; color: var(--text-primary);">Student Risk Analysis</h1>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">Early intervention system based on attendance and academic performance.</p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-danger">Risk Thresholds: &lt;75% Att. | &lt;6.0 CGPA</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <h3 class="mb-4" style="font-weight: 600;">Identified At-Risk Students</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Student</th>
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Risk Level</th>
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Risk Factors</th>
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Parent Contact</th>
+                                <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for risk in risk_report %}
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 1rem;">
+                                    <strong style="color: var(--text-primary);">{{ risk.name }}</strong><br>
+                                    <small style="color: var(--text-secondary);">{{ risk.roll_number }}</small>
+                                </td>
+                                <td style="padding: 1rem;">
+                                    <span class="badge {{ 'bg-danger' if risk.risk_level == 'High' else 'bg-warning text-dark' }}">
+                                        {{ risk.risk_level | upper }}
+                                    </span>
+                                </td>
+                                <td style="padding: 1rem;">
+                                    {% for factor in risk.factors %}
+                                    <div class="mb-1" style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <span style="width: 6px; height: 6px; background: {{ '#f44336' if 'Low' in factor or 'No' in factor else '#ff9800' }}; border-radius: 50%;"></span>
+                                        <small style="color: var(--text-secondary);">{{ factor }}</small>
+                                    </div>
+                                    {% endfor %}
+                                </td>
+                                <td style="padding: 1rem;">
+                                    <small style="color: var(--text-secondary);">{{ risk.email }}</small>
+                                </td>
+                                <td style="padding: 1rem;">
+                                    <div style="display: flex; gap: 0.5rem;">
+                                        <form action="{{ url_for('notify_risk', student_id=risk.id) }}" method="POST">
+                                            <button type="submit" class="btn btn-outline" style="color: #f44336; border-color: rgba(244, 67, 54, 0.3); padding: 0.4rem 0.8rem; font-size: 0.75rem;">Notify</button>
+                                        </form>
+                                        <form action="{{ url_for('schedule_meeting', student_id=risk.id) }}" method="POST">
+                                            <button type="submit" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">Meeting</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5">
+                                    <div style="color: #4caf50; font-size: 1.5rem; margin-bottom: 0.5rem;">✓ No students at risk!</div>
+                                    <p style="color: var(--text-secondary);">All students are currently meeting the requirements.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div class="card h-100">
+            <h5 style="margin-bottom: 1rem; font-weight: 600;">Analysis Methodology</h5>
+            <ul style="color: var(--text-secondary); font-size: 0.85rem; padding-left: 1.2rem;">
+                <li style="margin-bottom: 0.5rem;"><strong>High Risk:</strong> Poor performance (< 6.0 CGPA) + low attendance (< 75%).</li>
+                <li style="margin-bottom: 0.5rem;"><strong>Moderate Risk:</strong> Failing at least one criteria.</li>
+                <li><strong>Intervention:</strong> Recommended immediate parent meetings for High Risk cases.</li>
+            </ul>
+        </div>
+        <div class="card h-100" style="background: #fff5f5; border: 1px dashed #feb2b2;">
+            <div style="text-align: center;">
+                <h5 style="margin-bottom: 0.5rem; font-weight: 600;">Bulk Notification</h5>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.5rem;">Send automated alerts to all parents of at-risk students.</p>
+                <button class="btn btn-primary" style="background: #f44336; opacity: 0.5; width: auto;" disabled>Send All Alerts</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

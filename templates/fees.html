@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Fees - Smart Campus{% endblock %}
+
+{% block content %}
+<div class="card page-load">
+    <h2 style="font-weight: 700; margin-bottom: 1.5rem;">Fee Status & History</h2>
+    <div class="table-responsive">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Description</th>
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Amount</th>
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Due Date</th>
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr style="border-bottom: 1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='rgba(0,0,0,0.02)'" onmouseout="this.style.background='transparent'">
+                    <td style="padding: 1rem; font-weight: 600;">{{ record.description }}</td>
+                    <td style="padding: 1rem; font-weight: 700; color: var(--primary);">₹{{ "{:,}".format(record.amount) }}</td>
+                    <td style="padding: 1rem; color: var(--text-secondary);">{{ record.due_date }}</td>
+                    <td style="padding: 1rem;">
+                        <span class="badge {{ 'bg-success' if record.status == 'Paid' else ('bg-danger' if record.status == 'Overdue' else 'bg-info') }}">
+                            {{ record.status | upper }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+                        <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📁</div>
+                        No fee records found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

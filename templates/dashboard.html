@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Smart Campus{% endblock %}
+
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="grid-dashboard">
+    {% if session['role'] == 'student' %}
+    <!-- Student Stats -->
+    <div class="card">
+        <h3>Attendance Overview</h3>
+        <div class="stat-value" style="color: var(--primary);">{{ stats.get('attendance', 0)|round(1) }}%</div>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+            {% if stats.get('attendance', 0) < 75 %} 
+                <span class="badge bg-danger">Low Attendance</span>
+            {% else %}
+                <span class="badge bg-success">Satisfactory</span>
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="card">
+        <h3>Fee Status</h3>
+        <div class="stat-value" style="color: var(--secondary);">{{ stats.get('fee_status', 'N/A') }}</div>
+        <a href="/fees" class="btn btn-outline" style="margin-top: 1rem; text-decoration: none;">View History</a>
+    </div>
+
+    <div class="card" style="grid-column: span 2;">
+        <h3>Internal Performance</h3>
+        <canvas id="performanceChart" style="max-height: 250px;"></canvas>
+    </div>
+
+    {% elif session['role'] == 'faculty' %}
+    <!-- Faculty Stats -->
+    <div class="card">
+        <h3>Total Students</h3>
+        <div class="stat-value" style="color: var(--primary);">{{ stats.get('student_count', 0) }}</div>
+        <p class="text-secondary" style="margin-top: 0.5rem; font-size: 0.85rem;">Under your department</p>
+    </div>
+
+    <div class="card">
+        <h3>Quick Mark</h3>
+        <p class="text-secondary" style="font-size: 0.9rem;">Mark today's attendance for your class.</p>
+        <a href="/attendance" class="btn btn-primary" style="margin-top: 1.5rem; text-decoration: none;">Mark Attendance</a>
+    </div>
+
+    {% elif session['role'] == 'admin' %}
+    <!-- Admin Stats -->
+    <div class="card">
+        <h3>User Distribution</h3>
+        <div style="margin-top: 1rem;">
+            {% for item in stats.get('user_stats', []) %}
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.25rem;">
+                <span style="text-transform: capitalize; color: var(--text-secondary); font-size: 0.9rem;">{{ item.role }}s</span>
+                <span style="font-weight: 700; color: var(--primary);">{{ item.count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>System Status</h3>
+        <div class="stat-value" style="color: var(--secondary);">Active</div>
+        <p class="text-success" style="margin-top: 0.5rem; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="width: 8px; height: 8px; background: #4caf50; border-radius: 50%;"></span>
+            Database Connected
+        </p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="page-load" style="margin-top: 2rem; animation-delay: 0.2s;">
+    <!-- Quick Links -->
+    <div class="card">
+        <h3>Quick Actions</h3>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <a href="/events" class="btn btn-primary" style="text-decoration: none;">Events</a>
+            {% if session['role'] != 'admin' %}
+            <a href="/attendance" class="btn btn-outline" style="text-decoration: none;">Attendance</a>
+            {% else %}
+            <a href="/admin-panel" class="btn btn-outline" style="text-decoration: none;">Manage Users</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if session['role'] == 'student' %}
+<script>
+    const ctx = document.getElementById('performanceChart')?.getContext('2d');
+    if (ctx) {
+        const performanceData = {{ stats.get('performance', []) | tojson
+    }};
+    if (performanceData.length > 0) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: performanceData.map(p => p.subject),
+                datasets: [{
+                    label: 'Marks Obtained',
+                    data: performanceData.map(p => p.marks_obtained),
+                    backgroundColor: 'rgba(79, 70, 229, 0.6)',
+                    borderColor: '#4f46e5',
+                    borderWidth: 1
+                }, {
+                    label: 'Total Marks',
+                    data: performanceData.map(p => p.total_marks),
+                    backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                    borderColor: 'rgba(148, 163, 184, 0.5)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { labels: { color: '#94a3b8' } }
+                }
+            }
+        });
+    }
+    }
+</script>
+{% endif %}
+{% endblock %}

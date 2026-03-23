@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-load">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center py-4 mb-4">
+                <div class="avatar-circle mx-auto mb-3" style="width: 100px; height: 100px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; color: white; box-shadow: var(--shadow-2);">
+                    {{ user.username[0] | upper }}
+                </div>
+                <h3 class="mb-0" style="font-weight: 700;">{{ profile.full_name }}</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">{{ session.role }}</p>
+                <div class="px-4 mt-3">
+                    <div style="height: 1px; background: var(--border); margin: 1rem 0;"></div>
+                    <p class="small text-start" style="margin-bottom: 0.5rem;"><strong style="color: var(--text-secondary);">Username:</strong> {{ user.username }}</p>
+                    <p class="small text-start"><strong style="color: var(--text-secondary);">Email:</strong> {{ user.email }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card" style="padding: 2rem;">
+                <h3 class="mb-4" style="font-weight: 600;">Edit Profile</h3>
+                <form action="/profile" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Full Name</label>
+                            <input type="text" name="full_name" class="form-control" value="{{ profile.full_name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Account Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                        </div>
+                    </div>
+
+                    {% if session.role == 'student' %}
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Roll Number</label>
+                            <input type="text" name="roll_number" class="form-control" value="{{ profile.roll_number }}">
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Department</label>
+                            <input type="text" name="department" class="form-control" value="{{ profile.department }}">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Semester</label>
+                            <input type="number" name="semester" class="form-control" value="{{ profile.semester }}">
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Parent Email</label>
+                            <input type="email" name="parent_email" class="form-control" value="{{ profile.parent_email }}">
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Parent Phone</label>
+                            <input type="text" name="parent_phone" class="form-control" value="{{ profile.parent_phone }}">
+                        </div>
+                    </div>
+                    {% elif session.role == 'faculty' %}
+                    <div class="mb-4">
+                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Department</label>
+                        <input type="text" name="department" class="form-control" value="{{ profile.department }}">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">Bio / Specialization</label>
+                        <textarea name="bio" class="form-control" rows="3">{{ profile.bio }}</textarea>
+                    </div>
+                    {% elif session.role == 'admin' %}
+                    <div class="mb-4">
+                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.85rem;">System Title</label>
+                        <input type="text" name="title" class="form-control" value="{{ profile.title }}">
+                    </div>
+                    {% endif %}
+
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2.5rem;">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
