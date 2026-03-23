@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - Smart Campus{% endblock %}
+
+{% block auth_content %}
+<div class="card auth-card" style="width: 100%; max-width: 460px; padding: 2.5rem;">
+    <div class="logo" style="text-align: center; margin-bottom: 1.5rem; font-size: 1.5rem;">SMART CAMPUS</div>
+    <h2 style="text-align: center; margin-bottom: 2rem; font-weight: 600;">Create Student Account</h2>
+
+    <form action="/signup" method="POST">
+        <div class="mb-3">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Full Name</label>
+            <input type="text" name="full_name" class="form-control" required placeholder="Enter your full name">
+        </div>
+        <div class="mb-3">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Username</label>
+            <input type="text" name="username" class="form-control" required placeholder="Choose a username">
+        </div>
+        <div class="mb-3">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Email</label>
+            <input type="email" name="email" class="form-control" required placeholder="Enter your email">
+        </div>
+        <div class="mb-3">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Roll Number</label>
+            <input type="text" name="roll_number" class="form-control" placeholder="Optional roll number">
+        </div>
+        <div class="mb-3">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Department</label>
+            <input type="text" name="department" class="form-control" placeholder="Optional department">
+        </div>
+        <div class="mb-3">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Password</label>
+            <input type="password" name="password" class="form-control" required minlength="8" placeholder="Minimum 8 characters">
+        </div>
+        <div class="mb-4">
+            <label class="form-label" style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Confirm Password</label>
+            <input type="password" name="confirm_password" class="form-control" required minlength="8" placeholder="Re-enter password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+    </form>
+    <div style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary); font-size: 0.95rem;">
+        Already have an account?
+        <a href="/login" style="color: var(--primary); font-weight: 600; text-decoration: none;">Sign in</a>
+    </div>
+</div>
+{% endblock %}

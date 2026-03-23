@@ -13,10 +13,27 @@ def login(client, username, password):
 
 def run():
     with app.test_client() as client:
-        public_paths = ['/', '/login', '/manifest.json', '/sw.js', '/offline', '/healthz']
+        public_paths = ['/', '/login', '/signup', '/manifest.json', '/sw.js', '/offline', '/healthz']
         for path in public_paths:
             response = client.get(path)
             assert response.status_code == 200, f'{path} returned {response.status_code}'
+
+        response = client.post(
+            '/signup',
+            data={
+                'full_name': 'Signup Student',
+                'username': 'signupstudent',
+                'email': 'signupstudent@smartcampus.com',
+                'roll_number': 'CS2024555',
+                'department': 'Computer Science',
+                'password': 'student123',
+                'confirm_password': 'student123'
+            },
+            follow_redirects=True
+        )
+        assert response.status_code == 200
+        assert '/dashboard' in response.request.path
+        client.get('/logout')
 
         login(client, 'student1', 'student123')
         for path in ['/dashboard', '/attendance', '/performance-analyzer', '/transport', '/library', '/fees', '/events', '/syllabus', '/profile']:

@@ -91,6 +91,31 @@ def healthz():
     except Exception as exc:
         return {'status': 'error', 'database': 'unavailable', 'detail': str(exc)}, 503
 
+def create_user_account(username, email, password, role, full_name, roll_number=None, department=None):
+    user_id = db.table('users').insert({
+        'username': username,
+        'email': email,
+        'password_hash': generate_password_hash(password),
+        'role': role
+    })
+
+    if role == 'student':
+        db.table('student_profiles').insert({
+            'user_id': user_id,
+            'full_name': full_name,
+            'roll_number': roll_number or f"STU{user_id}",
+            'department': department or 'General',
+            'semester': 1
+        })
+    elif role == 'faculty':
+        db.table('faculty_profiles').insert({
+            'user_id': user_id,
+            'full_name': full_name,
+            'department': department or 'General'
+        })
+
+    return user_id
+
 # Login required decorator
 def login_required(f):
     @wraps(f)
@@ -137,6 +162,58 @@ def login():
             flash('Invalid username or password', 'danger')
 
     return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        username = (request.form.get('username') or '').strip()
+        email = (request.form.get('email') or '').strip().lower()
+        password = request.form.get('password') or ''
+        confirm_password = request.form.get('confirm_password') or ''
+        full_name = (request.form.get('full_name') or '').strip()
+        roll_number = (request.form.get('roll_number') or '').strip()
+        department = (request.form.get('department') or '').strip()
+
+        if not all([username, email, password, confirm_password, full_name]):
+            flash('All required fields must be filled in.', 'danger')
+            return render_template('signup.html')
+
+        if password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+            return render_template('signup.html')
+
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long.', 'danger')
+            return render_template('signup.html')
+
+        if db.table('users').get(User.username == username) or db.table('users').get(where('email') == email):
+            flash('Username or Email already exists!', 'danger')
+            return render_template('signup.html')
+
+        if roll_number and db.table('student_profiles').get(where('roll_number') == roll_number):
+            flash('Roll number already exists!', 'danger')
+            return render_template('signup.html')
+
+        user_id = create_user_account(
+            username=username,
+            email=email,
+            password=password,
+            role='student',
+            full_name=full_name,
+            roll_number=roll_number or None,
+            department=department or None
+        )
+
+        session['user_id'] = user_id
+        session['username'] = username
+        session['role'] = 'student'
+        flash('Account created successfully!', 'success')
+        return redirect(url_for('dashboard'))
+
+    return render_template('signup.html')
 
 @app.route('/logout')
 def logout():
@@ -895,32 +972,22 @@ def add_user():
         flash('Username or Email already exists!', 'danger')
         return redirect(url_for('admin_panel'))
         
-    # Create User
-    user_id = db.table('users').insert({
-        'username': username,
-        'email': email,
-        'password_hash': generate_password_hash(password),
-        'role': role
-    })
-    
-    # Create Profile
-    if role == 'student':
-        roll_number = request.form.get('roll_number')
-        db.table('student_profiles').insert({
+    user_id = create_user_account(
+        username=username,
+        email=email,
+        password=password,
+        role=role,
+        full_name=full_name,
+        roll_number=request.form.get('roll_number'),
+        department=request.form.get('department') or 'TBD'
+    )
+
+    if role == 'admin':
+        db.table('admin_profiles').insert({
             'user_id': user_id,
             'full_name': full_name,
-            'roll_number': roll_number or f"STU{user_id}",
-            'department': 'TBD',
-            'semester': 1
+            'title': 'System Admin'
         })
-    elif role == 'faculty':
-        department = request.form.get('department')
-        db.table('faculty_profiles').insert({
-            'user_id': user_id,
-            'full_name': full_name,
-            'department': department or 'General'
-        })
-    # Admin roles don't have separate profiles currently, they use the users table directly
         
     flash(f'User {username} added successfully!', 'success')
     return redirect(url_for('admin_panel'))
