@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from tinydb import Query, where
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.middleware.proxy_fix import ProxyFix
+from sqlalchemy import text
 from config import Config
 from functools import wraps
 import datetime
@@ -47,8 +48,6 @@ def generate_timed_token(session_id, secret, window_offset=0):
 app = Flask(__name__)
 app.config.from_object(Config)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 # PWA Routes
 @app.route('/manifest.json')
@@ -83,6 +82,14 @@ def append_notification_log(lines):
     with open(log_path, 'a', encoding='utf-8') as log_file:
         log_file.write('\n'.join(lines) + '\n')
     return log_path
+
+@app.route('/healthz')
+def healthz():
+    try:
+        sql_db.session.execute(text('SELECT 1'))
+        return {'status': 'ok', 'database': 'connected'}, 200
+    except Exception as exc:
+        return {'status': 'error', 'database': 'unavailable', 'detail': str(exc)}, 503
 
 # Login required decorator
 def login_required(f):

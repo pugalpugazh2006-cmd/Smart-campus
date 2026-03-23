@@ -1,10 +1,16 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 class Config:
+    ENV = os.environ.get('FLASK_ENV', 'production')
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-me'
 
     DATABASE_URL = os.environ.get('DATABASE_URL')
     VERCEL = os.environ.get('VERCEL') == '1'
+    IS_PRODUCTION = ENV == 'production' or VERCEL
 
     # SQLAlchemy Configuration
     SQLALCHEMY_DATABASE_URI = DATABASE_URL or 'sqlite:///smartcampus.db'
@@ -14,8 +20,12 @@ class Config:
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql://", 1)
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    PREFERRED_URL_SCHEME = 'https' if VERCEL else 'http'
-    SESSION_COOKIE_SECURE = VERCEL
+    SQLALCHEMY_ENGINE_OPTIONS = {'pool_pre_ping': True}
+    PREFERRED_URL_SCHEME = 'https' if IS_PRODUCTION else 'http'
+    SESSION_COOKIE_SECURE = IS_PRODUCTION
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_HTTPONLY = True
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024
 
     # TinyDB fallback (legacy diagnostic tooling only)
     DB_FILE = 'db.json'

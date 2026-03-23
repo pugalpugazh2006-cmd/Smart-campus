@@ -13,7 +13,7 @@ def login(client, username, password):
 
 def run():
     with app.test_client() as client:
-        public_paths = ['/', '/login', '/manifest.json', '/sw.js', '/offline']
+        public_paths = ['/', '/login', '/manifest.json', '/sw.js', '/offline', '/healthz']
         for path in public_paths:
             response = client.get(path)
             assert response.status_code == 200, f'{path} returned {response.status_code}'
