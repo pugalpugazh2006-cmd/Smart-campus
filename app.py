@@ -1009,6 +1009,38 @@ def add_user():
     flash(f'User {username} added successfully!', 'success')
     return redirect(url_for('admin_panel'))
 
+@app.route('/delete-user/<int:user_id>', methods=['POST'])
+@login_required
+@role_required('admin')
+def delete_user(user_id):
+    user = db.table('users').get(doc_id=user_id)
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('admin_panel'))
+
+    if user_id == session['user_id']:
+        flash('You cannot delete your own account while logged in.', 'danger')
+        return redirect(url_for('admin_panel'))
+
+    if user['role'] == 'admin':
+        flash('The admin account cannot be deleted.', 'danger')
+        return redirect(url_for('admin_panel'))
+
+    db.table('student_profiles').remove(where('user_id') == user_id)
+    db.table('faculty_profiles').remove(where('user_id') == user_id)
+    db.table('admin_profiles').remove(where('user_id') == user_id)
+    db.table('attendance').remove(where('student_id') == user_id)
+    db.table('attendance').remove(where('marked_by') == user_id)
+    db.table('fees').remove(where('student_id') == user_id)
+    db.table('event_registrations').remove(where('student_id') == user_id)
+    db.table('library_records').remove(where('student_id') == user_id)
+    db.table('student_transport').remove(where('student_id') == user_id)
+    db.table('qr_sessions').remove(where('created_by') == user_id)
+    db.table('users').remove(doc_ids=[user_id])
+
+    flash(f"User {user['username']} removed successfully.", 'success')
+    return redirect(url_for('admin_panel'))
+
 @app.route('/admin-panel')
 @login_required
 @role_required('admin')

@@ -16,6 +16,7 @@
                     <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Username</th>
                     <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Email</th>
                     <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Role</th>
+                    <th style="padding: 1rem; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,6 +29,15 @@
                         <span class="badge {{ 'bg-info' if user.role == 'admin' else ('bg-success' if user.role == 'faculty' else 'bg-secondary') }}">
                             {{ user.role | upper }}
                         </span>
+                    </td>
+                    <td style="padding: 1rem;">
+                        {% if user.role != 'admin' %}
+                        <form action="/delete-user/{{ user.id }}" method="POST" onsubmit="return confirm('Delete {{ user.username }}? This cannot be undone.');">
+                            <button type="submit" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; color: var(--error); border-color: rgba(176, 0, 32, 0.2);">Delete</button>
+                        </form>
+                        {% else %}
+                        <small style="color: var(--text-secondary); font-weight: 600;">Protected</small>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
