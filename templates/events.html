@@ -6,41 +6,42 @@
 <div class="page-load">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 style="font-weight: 700; margin-bottom: 0;">Campus Events</h1>
-        {% if session['role'] in ['admin', 'faculty'] %}
-        <button class="btn btn-primary" type="button" onclick="openEventModal()">+ Add New Event</button>
-        {% endif %}
     </div>
 
-    <!-- Add Event Modal -->
-    <div id="addEventModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center; backdrop-filter: blur(4px); padding:1rem;">
-        <div class="card" style="width:min(560px, calc(100vw - 2rem)); max-height: calc(100vh - 2rem); overflow-y:auto; padding:2rem; animation: fadeInSlideUp 0.3s ease-out;">
-            <h3 style="margin-bottom: 1.5rem; font-weight: 700;">Create New Event</h3>
-            <form action="/add-event" method="POST">
-                <div class="mb-3">
+    {% if session['role'] in ['admin', 'faculty'] %}
+    <div class="card mb-4">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+            <div>
+                <h3 style="margin:0; font-weight:700;">Publish New Event</h3>
+                <p style="margin:0.35rem 0 0; color:var(--text-secondary); font-size:0.9rem;">Create an event directly from this page.</p>
+            </div>
+            <span class="badge bg-info">STAFF ONLY</span>
+        </div>
+        <form action="/add-event" method="POST">
+            <div class="row">
+                <div class="col-md-6 mb-3">
                     <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Event Title</label>
                     <input type="text" name="title" class="form-control" required placeholder="e.g., Annual Sports Day">
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Date</label>
-                        <input type="date" name="event_date" class="form-control" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Location</label>
-                        <input type="text" name="location" class="form-control" required placeholder="e.g., Main Auditorium">
-                    </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Date</label>
+                    <input type="date" name="event_date" class="form-control" required>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Description</label>
-                    <textarea name="description" class="form-control" rows="3" required placeholder="Describe the event..."></textarea>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Location</label>
+                    <input type="text" name="location" class="form-control" required placeholder="Auditorium">
                 </div>
-                <div class="d-flex justify-content-end gap-2 mt-4 pt-3" style="border-top: 1px solid var(--border);">
-                    <button type="button" class="btn btn-outline" onclick="closeEventModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Publish Event</button>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" style="color: var(--text-secondary); font-size: 0.9rem;">Description</label>
+                <textarea name="description" class="form-control" rows="3" required placeholder="Describe the event..."></textarea>
+            </div>
+            <div style="display:flex; justify-content:flex-end;">
+                <button type="submit" class="btn btn-primary" style="min-width: 180px;">Publish Event</button>
+            </div>
+        </form>
     </div>
+    {% endif %}
 
     <div class="grid-dashboard">
         {% for event in events %}
@@ -70,21 +71,4 @@
         {% endfor %}
     </div>
 </div>
-
-<script>
-function openEventModal() {
-    document.getElementById('addEventModal').style.display = 'flex';
-}
-
-function closeEventModal() {
-    document.getElementById('addEventModal').style.display = 'none';
-}
-
-document.addEventListener('click', function (event) {
-    const modal = document.getElementById('addEventModal');
-    if (event.target === modal) {
-        closeEventModal();
-    }
-});
-</script>
 {% endblock %}
